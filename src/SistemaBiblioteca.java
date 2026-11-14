@@ -28,7 +28,7 @@ public class SistemaBiblioteca {
     /** 1. Registrar: valida, guarda en la lista general y encola como pendiente. */
     public LibroPrestamo registrar(String codigo, String titulo, String autor,
                                    String usuario, int dias) throws Exception {
-        String cod = validarCodigo(codigo);
+        String cod = validarCodigoDisponible(codigo);
         validarTexto(titulo, "El titulo del libro");
         validarTexto(autor, "El autor");
         validarTexto(usuario, "El nombre del usuario");
@@ -36,14 +36,22 @@ public class SistemaBiblioteca {
             throw new Exception("Los dias de prestamo deben estar entre " + DIAS_MINIMOS
                     + " y " + DIAS_MAXIMOS);
         }
-        if (listaGeneral.contiene(LibroPrestamo.conCodigo(cod))) {
-            throw new Exception("Ya existe un prestamo con el codigo " + cod);
-        }
-
         LibroPrestamo prestamo = new LibroPrestamo(cod, titulo.trim(), autor.trim(), usuario.trim(), dias);
         listaGeneral.agregar(prestamo);
         colaPendientes.encolar(prestamo);
         return prestamo;
+    }
+
+    /**
+     * Verifica que un codigo sea valido y que no este registrado. El menu lo usa justo despues
+     * de leer el codigo, para no pedir los demas datos si el codigo ya existe.
+     */
+    public String validarCodigoDisponible(String codigo) throws Exception {
+        String cod = validarCodigo(codigo);
+        if (listaGeneral.contiene(LibroPrestamo.conCodigo(cod))) {
+            throw new Exception("Ya existe un prestamo con el codigo " + cod);
+        }
+        return cod;
     }
 
     /** 4. Procesar: el primero de la cola se entrega y pasa a la pila de historial. */
@@ -241,7 +249,7 @@ public class SistemaBiblioteca {
     }
 
     private static void opcionRegistrar(SistemaBiblioteca sistema) throws Exception {
-        String codigo = leerTexto("Codigo del prestamo (ej: PR-001): ");
+        String codigo = sistema.validarCodigoDisponible(leerTexto("Codigo del prestamo (ej: PR-001): "));
         String titulo = leerTexto("Titulo del libro: ");
         String autor = leerTexto("Autor: ");
         String usuario = leerTexto("Nombre del usuario: ");

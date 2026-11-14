@@ -166,6 +166,9 @@ public class PruebasBiblioteca {
         s.registrar("PR-001", "Titulo", "Autor", "Usuario", 7);
         verificarExcepcion("codigo duplicado (sin importar mayusculas)",
                 () -> s.registrar("pr-001", "Otro", "Autor", "Usuario", 7));
+        verificarExcepcion("validarCodigoDisponible rechaza un codigo ya registrado",
+                () -> s.validarCodigoDisponible("PR-001"));
+        verificar("validarCodigoDisponible acepta un codigo nuevo", s.validarCodigoDisponible("pr-002"), "PR-002");
         verificarExcepcion("codigo vacio", () -> s.registrar("  ", "T", "A", "U", 7));
         verificarExcepcion("codigo con simbolos", () -> s.registrar("PR#1", "T", "A", "U", 7));
         verificarExcepcion("titulo vacio", () -> s.registrar("PR-002", "", "A", "U", 7));
