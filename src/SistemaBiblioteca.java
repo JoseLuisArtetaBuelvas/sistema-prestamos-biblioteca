@@ -44,6 +44,17 @@ public class SistemaBiblioteca {
         return prestamo;
     }
 
+    /** 4. Procesar: el primero de la cola se entrega y pasa a la pila de historial. */
+    public LibroPrestamo procesarSiguiente() throws Exception {
+        if (colaPendientes.esVacia()) {
+            throw new Exception("No hay prestamos pendientes por entregar");
+        }
+        LibroPrestamo procesado = (LibroPrestamo) colaPendientes.desencolar();
+        procesado.setEstado(LibroPrestamo.ENTREGADO);
+        historialProcesados.apilar(procesado);
+        return procesado;
+    }
+
     public Lista getListaGeneral() {
         return listaGeneral;
     }
