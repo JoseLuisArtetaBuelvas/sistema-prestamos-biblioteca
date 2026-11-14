@@ -63,4 +63,46 @@ public class Pila {
     public int tamanio() {
         return cuenta;
     }
+
+    public boolean contiene(Object dato) {
+        return buscar(dato) != -1;
+    }
+
+    /**
+     * Distancia desde la cima: 1 si el dato esta en la cima, 2 si esta justo debajo, etc.
+     * Retorna -1 si no esta en la pila.
+     */
+    public int buscar(Object dato) {
+        Nodo actual = cima;
+        int distancia = 1;
+        while (actual != null) {
+            if (actual.getDato().equals(dato)) {
+                return distancia;
+            }
+            actual = actual.getIzquierda();
+            distancia++;
+        }
+        return -1;
+    }
+
+    public void limpiar() {
+        cima = null;
+        cuenta = 0;
+    }
+
+    /** Muestra la pila desde la cima (el mas reciente) hasta la base. */
+    public String mostrar() {
+        if (esVacia()) {
+            return "(pila vacia)";
+        }
+        StringBuilder sb = new StringBuilder();
+        Nodo actual = cima;
+        int nivel = 1;
+        while (actual != null) {
+            sb.append(nivel == 1 ? "CIMA -> " : "        ").append(actual.getDato()).append("\n");
+            actual = actual.getIzquierda();
+            nivel++;
+        }
+        return sb.toString().trim();
+    }
 }
