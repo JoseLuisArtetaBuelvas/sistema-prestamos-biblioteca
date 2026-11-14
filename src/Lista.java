@@ -201,6 +201,17 @@ public class Lista {
         cuenta = 0;
     }
 
+    /** Copia los datos a un arreglo en un solo recorrido (util para reportes). */
+    public Object[] aArreglo() {
+        Object[] datos = new Object[cuenta];
+        Nodo actual = primero;
+        for (int i = 0; i < cuenta; i++) {
+            datos[i] = actual.getDato();
+            actual = actual.getDerecha();
+        }
+        return datos;
+    }
+
     /** Recorrido de primero a ultimo usando las referencias derecha. */
     public String mostrarAdelante() {
         if (esVacia()) {
