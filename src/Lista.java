@@ -86,6 +86,57 @@ public class Lista {
     }
 
     // ------------------------------------------------------------------
+    // Eliminar
+    // ------------------------------------------------------------------
+
+    public Object eliminarPrimero() throws Exception {
+        if (esVacia()) {
+            throw new Exception("La lista esta vacia");
+        }
+        Object dato = primero.getDato();
+        primero = primero.getDerecha();
+        if (primero == null) {
+            ultimo = null;                      // la lista quedo vacia
+        } else {
+            primero.setIzquierda(null);         // se suelta el nodo eliminado
+        }
+        --cuenta;
+        return dato;
+    }
+
+    public Object eliminarUltimo() throws Exception {
+        if (esVacia()) {
+            throw new Exception("La lista esta vacia");
+        }
+        Object dato = ultimo.getDato();
+        ultimo = ultimo.getIzquierda();
+        if (ultimo == null) {
+            primero = null;
+        } else {
+            ultimo.setDerecha(null);
+        }
+        --cuenta;
+        return dato;
+    }
+
+    public Object eliminarEnPosicion(int indice) throws Exception {
+        Nodo objetivo = buscar(indice);         // valida lista vacia y rango
+        if (objetivo == primero) {
+            return eliminarPrimero();
+        }
+        if (objetivo == ultimo) {
+            return eliminarUltimo();
+        }
+        // Nodo intermedio: sus vecinos se apuntan entre si
+        Nodo anterior = objetivo.getIzquierda();
+        Nodo siguiente = objetivo.getDerecha();
+        anterior.setDerecha(siguiente);
+        siguiente.setIzquierda(anterior);
+        --cuenta;
+        return objetivo.getDato();
+    }
+
+    // ------------------------------------------------------------------
     // Buscar
     // ------------------------------------------------------------------
 
