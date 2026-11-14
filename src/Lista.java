@@ -1,0 +1,120 @@
+/**
+ * Lista doblemente enlazada.
+ *
+ * primero -> ... -> ultimo  (recorrido hacia adelante con getDerecha)
+ * ultimo  -> ... -> primero (recorrido hacia atras con getIzquierda)
+ *
+ * En el sistema se usa como registro general de todos los prestamos.
+ * Basada en el ejemplo del docente John Carlos Arrieta Arrieta.
+ */
+public class Lista {
+
+    private int cuenta;
+    private Nodo primero;
+    private Nodo ultimo;
+
+    public Lista() {
+        cuenta = 0;
+        primero = null;
+        ultimo = null;
+    }
+
+    public boolean esVacia() {
+        return cuenta == 0;
+    }
+
+    // ------------------------------------------------------------------
+    // Agregar
+    // ------------------------------------------------------------------
+
+    /** Agrega al final de la lista. */
+    public void agregar(Object dato) throws Exception {
+        validarDato(dato);
+        Nodo objetivo = new Nodo(dato);
+        if (esVacia()) {
+            primero = objetivo;
+            ultimo = objetivo;
+        } else {
+            ultimo.setDerecha(objetivo);     // el ultimo actual apunta al nuevo
+            objetivo.setIzquierda(ultimo);   // el nuevo apunta hacia atras al ultimo actual
+            ultimo = objetivo;               // el nuevo pasa a ser el ultimo
+        }
+        ++cuenta;
+    }
+
+    /** Agrega al inicio de la lista. */
+    public void agregarAlInicio(Object dato) throws Exception {
+        validarDato(dato);
+        Nodo objetivo = new Nodo(dato);
+        if (esVacia()) {
+            primero = objetivo;
+            ultimo = objetivo;
+        } else {
+            objetivo.setDerecha(primero);
+            primero.setIzquierda(objetivo);
+            primero = objetivo;
+        }
+        ++cuenta;
+    }
+
+    /**
+     * Agrega en la posicion indicada (0 = inicio, cuenta = final).
+     * Los nodos desde esa posicion se corren una posicion a la derecha.
+     */
+    public void agregarEnPosicion(int indice, Object dato) throws Exception {
+        validarDato(dato);
+        if (indice < 0 || indice > cuenta) {
+            throw new Exception("La posicion " + indice + " esta fuera del rango 0 - " + cuenta);
+        }
+        if (indice == 0) {
+            agregarAlInicio(dato);
+            return;
+        }
+        if (indice == cuenta) {
+            agregar(dato);
+            return;
+        }
+        Nodo actual = buscar(indice);           // nodo que hoy ocupa la posicion
+        Nodo anterior = actual.getIzquierda();
+        Nodo objetivo = new Nodo(dato);
+
+        objetivo.setIzquierda(anterior);
+        objetivo.setDerecha(actual);
+        anterior.setDerecha(objetivo);
+        actual.setIzquierda(objetivo);
+        ++cuenta;
+    }
+
+    // ------------------------------------------------------------------
+    // Buscar
+    // ------------------------------------------------------------------
+
+    /** Recorre desde el primero hasta la posicion pedida. */
+    private Nodo buscar(int indice) throws Exception {
+        if (esVacia()) {
+            throw new Exception("La lista esta vacia");
+        }
+        if (indice < 0 || indice >= cuenta) {
+            throw new Exception("La posicion " + indice + " esta fuera del rango 0 - " + (cuenta - 1));
+        }
+        Nodo actual = primero;
+        for (int i = 0; i < indice; i++) {
+            actual = actual.getDerecha();
+        }
+        return actual;
+    }
+
+    // ------------------------------------------------------------------
+    // Otros
+    // ------------------------------------------------------------------
+
+    public int cuentaElementos() {
+        return cuenta;
+    }
+
+    private void validarDato(Object dato) throws Exception {
+        if (dato == null) {
+            throw new Exception("El dato no puede ser nulo");
+        }
+    }
+}
