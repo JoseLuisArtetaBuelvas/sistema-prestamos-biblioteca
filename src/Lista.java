@@ -155,12 +155,50 @@ public class Lista {
         return actual;
     }
 
+    /** Posicion del dato (usa equals) o -1 si no esta. */
+    private int indiceDe(Object dato) {
+        Nodo actual = primero;
+        for (int i = 0; i < cuenta; i++) {
+            if (actual.getDato().equals(dato)) {
+                return i;
+            }
+            actual = actual.getDerecha();
+        }
+        return -1;
+    }
+
+    public Object buscarDato(int indice) throws Exception {
+        return buscar(indice).getDato();
+    }
+
+    public int buscarDato(Object dato) throws Exception {
+        if (esVacia()) {
+            throw new Exception("La lista esta vacia");
+        }
+        int indice = indiceDe(dato);
+        if (indice == -1) {
+            throw new Exception("El elemento no esta en la lista");
+        }
+        return indice;
+    }
+
+    public boolean contiene(Object dato) {
+        return dato != null && indiceDe(dato) != -1;
+    }
+
     // ------------------------------------------------------------------
     // Otros
     // ------------------------------------------------------------------
 
     public int cuentaElementos() {
         return cuenta;
+    }
+
+    /** Vacia la lista soltando las referencias de inicio y fin. */
+    public void limpiar() {
+        primero = null;
+        ultimo = null;
+        cuenta = 0;
     }
 
     private void validarDato(Object dato) throws Exception {
