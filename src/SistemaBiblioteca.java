@@ -55,6 +55,53 @@ public class SistemaBiblioteca {
         return procesado;
     }
 
+    /** 6. Buscar en la lista general por codigo (usa equals de LibroPrestamo). */
+    public LibroPrestamo buscarPorCodigo(String codigo) throws Exception {
+        String cod = validarCodigo(codigo);
+        if (listaGeneral.esVacia()) {
+            throw new Exception("No hay prestamos registrados");
+        }
+        LibroPrestamo buscado = LibroPrestamo.conCodigo(cod);
+        if (!listaGeneral.contiene(buscado)) {
+            throw new Exception("No existe un prestamo con el codigo " + cod);
+        }
+        int posicion = listaGeneral.buscarDato(buscado);
+        return (LibroPrestamo) listaGeneral.buscarDato(posicion);
+    }
+
+    /**
+     * 7. Cancelar un pendiente usando una cola auxiliar.
+     * Se desencolan todos: el que coincide se marca CANCELADO y no se vuelve a encolar;
+     * los demas pasan a la auxiliar y luego regresan a la cola en el mismo orden.
+     */
+    public LibroPrestamo cancelarPendiente(String codigo) throws Exception {
+        LibroPrestamo prestamo = buscarPorCodigo(codigo);   // valida que exista
+        if (!LibroPrestamo.PENDIENTE.equals(prestamo.getEstado())) {
+            throw new Exception("El prestamo " + prestamo.getCodigoPrestamo() + " no esta pendiente (estado: "
+                    + prestamo.getEstado() + "). Solo se cancelan prestamos pendientes");
+        }
+
+        Cola auxiliar = new Cola();
+        LibroPrestamo cancelado = null;
+        while (!colaPendientes.esVacia()) {
+            LibroPrestamo actual = (LibroPrestamo) colaPendientes.desencolar();
+            if (cancelado == null && actual.equals(prestamo)) {
+                cancelado = actual;               // no se pasa a la auxiliar
+            } else {
+                auxiliar.encolar(actual);
+            }
+        }
+        while (!auxiliar.esVacia()) {
+            colaPendientes.encolar(auxiliar.desencolar());
+        }
+
+        if (cancelado == null) {
+            throw new Exception("El prestamo " + prestamo.getCodigoPrestamo() + " no se encontro en la cola");
+        }
+        cancelado.setEstado(LibroPrestamo.CANCELADO);
+        return cancelado;
+    }
+
     public Lista getListaGeneral() {
         return listaGeneral;
     }
