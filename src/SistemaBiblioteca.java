@@ -102,6 +102,33 @@ public class SistemaBiblioteca {
         return cancelado;
     }
 
+    /** 8. Deshacer: la ultima entrega sale de la pila y vuelve a la cola como pendiente. */
+    public LibroPrestamo deshacerUltimoProcesamiento() throws Exception {
+        if (historialProcesados.esVacia()) {
+            throw new Exception("No hay entregas para deshacer");
+        }
+        LibroPrestamo ultimo = (LibroPrestamo) historialProcesados.desapilar();
+        ultimo.setEstado(LibroPrestamo.PENDIENTE);
+        colaPendientes.encolar(ultimo);
+        return ultimo;
+    }
+
+    /** 9. Cantidades: [registrados, pendientes, entregados, cancelados]. */
+    public int[] cantidades() {
+        int cancelados = 0;
+        for (Object o : listaGeneral.aArreglo()) {
+            if (LibroPrestamo.CANCELADO.equals(((LibroPrestamo) o).getEstado())) {
+                cancelados++;
+            }
+        }
+        return new int[] {
+            listaGeneral.cuentaElementos(),
+            colaPendientes.tamanio(),
+            historialProcesados.tamanio(),
+            cancelados
+        };
+    }
+
     public Lista getListaGeneral() {
         return listaGeneral;
     }
