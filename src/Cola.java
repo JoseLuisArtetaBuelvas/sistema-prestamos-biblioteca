@@ -67,4 +67,37 @@ public class Cola {
     public int tamanio() {
         return cuenta;
     }
+
+    public boolean contiene(Object dato) {
+        Nodo actual = frente;
+        while (actual != null) {
+            if (actual.getDato().equals(dato)) {
+                return true;
+            }
+            actual = actual.getDerecha();
+        }
+        return false;
+    }
+
+    public void limpiar() {
+        frente = null;
+        fin = null;
+        cuenta = 0;
+    }
+
+    /** Muestra la cola del frente al fin (orden de atencion). */
+    public String mostrar() {
+        if (esVacia()) {
+            return "(cola vacia)";
+        }
+        StringBuilder sb = new StringBuilder();
+        Nodo actual = frente;
+        int turno = 1;
+        while (actual != null) {
+            sb.append(turno).append(". ").append(actual.getDato()).append("\n");
+            actual = actual.getDerecha();
+            turno++;
+        }
+        return sb.toString().trim();
+    }
 }
