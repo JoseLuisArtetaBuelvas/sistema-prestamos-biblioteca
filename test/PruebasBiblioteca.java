@@ -13,6 +13,9 @@ public class PruebasBiblioteca {
         probarLista();
         probarCola();
         probarPila();
+        probarLibroPrestamo();
+        probarSistema();
+        probarValidaciones();
 
         System.out.println();
         System.out.println("Resultado: " + aprobadas + " aprobadas, " + fallidas + " fallidas.");
@@ -97,6 +100,79 @@ public class PruebasBiblioteca {
         p.apilar("D");
         p.limpiar();
         verificar("limpiar", p.esVacia(), true);
+    }
+
+    private static void probarLibroPrestamo() {
+        System.out.println("== LibroPrestamo ==");
+        LibroPrestamo a = new LibroPrestamo("pr-001", "Titulo", "Autor", "Usuario", 7);
+        LibroPrestamo b = LibroPrestamo.conCodigo("PR-001");
+        verificar("codigo se guarda en mayusculas", a.getCodigoPrestamo(), "PR-001");
+        verificar("equals compara solo el codigo", a.equals(b), true);
+        verificar("hashCode consistente con equals", a.hashCode() == b.hashCode(), true);
+        verificar("estado inicial", a.getEstado(), LibroPrestamo.PENDIENTE);
+    }
+
+    private static void probarSistema() throws Exception {
+        System.out.println("== Sistema de prestamos ==");
+        SistemaBiblioteca s = new SistemaBiblioteca();
+        s.registrar("PR-001", "Cien anos de soledad", "Gabriel Garcia Marquez", "Ana Perez", 7);
+        s.registrar("PR-002", "El principito", "Antoine de Saint-Exupery", "Luis Gomez", 5);
+        s.registrar("PR-003", "La voragine", "Jose Eustasio Rivera", "Maria Ruiz", 10);
+        s.registrar("PR-004", "Maria", "Jorge Isaacs", "Carlos Diaz", 3);
+        verificar("registrar agrega a la lista", s.getListaGeneral().cuentaElementos(), 4);
+        verificar("registrar encola", s.getColaPendientes().tamanio(), 4);
+
+        LibroPrestamo p1 = s.procesarSiguiente();
+        verificar("procesa en orden de llegada", p1.getCodigoPrestamo(), "PR-001");
+        verificar("procesado queda ENTREGADO", p1.getEstado(), LibroPrestamo.ENTREGADO);
+        s.procesarSiguiente();
+        verificar("historial con 2 entregas", s.getHistorialProcesados().tamanio(), 2);
+        verificar("cima del historial es la ultima entrega",
+                ((LibroPrestamo) s.getHistorialProcesados().peek()).getCodigoPrestamo(), "PR-002");
+
+        LibroPrestamo c = s.cancelarPendiente("pr-004");
+        verificar("cancelar marca CANCELADO", c.getEstado(), LibroPrestamo.CANCELADO);
+        verificar("cancelado sale de la cola", s.getColaPendientes().tamanio(), 1);
+        verificar("cancelado sigue en la lista general", s.getListaGeneral().cuentaElementos(), 4);
+        verificar("la cola conserva el orden", s.getColaPendientes().mostrar().startsWith("1. [PR-003]"), true);
+        verificarExcepcion("no se cancela un entregado", () -> s.cancelarPendiente("PR-001"));
+        verificarExcepcion("no se cancela dos veces", () -> s.cancelarPendiente("PR-004"));
+
+        LibroPrestamo d = s.deshacerUltimoProcesamiento();
+        verificar("deshacer saca la cima (PR-002)", d.getCodigoPrestamo(), "PR-002");
+        verificar("deshacer lo deja PENDIENTE", d.getEstado(), LibroPrestamo.PENDIENTE);
+        verificar("deshacer lo encola al final", s.getColaPendientes().mostrar(),
+                "1. " + s.buscarPorCodigo("PR-003") + "\n2. " + d);
+
+        verificar("buscar por codigo", s.buscarPorCodigo("pr-003").getTituloLibro(), "La voragine");
+        verificarExcepcion("buscar codigo inexistente", () -> s.buscarPorCodigo("PR-999"));
+
+        int[] cant = s.cantidades();
+        verificar("cantidades [registrados, pendientes, entregados, cancelados]",
+                cant[0] + "," + cant[1] + "," + cant[2] + "," + cant[3], "4,2,1,1");
+
+        s.procesarSiguiente();
+        s.procesarSiguiente();
+        verificarExcepcion("procesar sin pendientes", s::procesarSiguiente);
+        s.deshacerUltimoProcesamiento();
+        s.deshacerUltimoProcesamiento();
+        s.deshacerUltimoProcesamiento();
+        verificarExcepcion("deshacer sin historial", s::deshacerUltimoProcesamiento);
+    }
+
+    private static void probarValidaciones() throws Exception {
+        System.out.println("== Validaciones ==");
+        SistemaBiblioteca s = new SistemaBiblioteca();
+        s.registrar("PR-001", "Titulo", "Autor", "Usuario", 7);
+        verificarExcepcion("codigo duplicado (sin importar mayusculas)",
+                () -> s.registrar("pr-001", "Otro", "Autor", "Usuario", 7));
+        verificarExcepcion("codigo vacio", () -> s.registrar("  ", "T", "A", "U", 7));
+        verificarExcepcion("codigo con simbolos", () -> s.registrar("PR#1", "T", "A", "U", 7));
+        verificarExcepcion("titulo vacio", () -> s.registrar("PR-002", "", "A", "U", 7));
+        verificarExcepcion("dias en 0", () -> s.registrar("PR-002", "T", "A", "U", 0));
+        verificarExcepcion("dias mayores a 30", () -> s.registrar("PR-002", "T", "A", "U", 31));
+        verificar("ningun registro invalido entro a la lista", s.getListaGeneral().cuentaElementos(), 1);
+        verificar("ningun registro invalido entro a la cola", s.getColaPendientes().tamanio(), 1);
     }
 
     // ------------------------------------------------------------------
