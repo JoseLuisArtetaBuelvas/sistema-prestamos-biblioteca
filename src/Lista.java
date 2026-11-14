@@ -201,6 +201,38 @@ public class Lista {
         cuenta = 0;
     }
 
+    /** Recorrido de primero a ultimo usando las referencias derecha. */
+    public String mostrarAdelante() {
+        if (esVacia()) {
+            return "(lista vacia)";
+        }
+        StringBuilder sb = new StringBuilder();
+        Nodo actual = primero;
+        int i = 0;
+        while (actual != null) {
+            sb.append(i).append(". ").append(actual.getDato()).append("\n");
+            actual = actual.getDerecha();
+            i++;
+        }
+        return sb.toString().trim();
+    }
+
+    /** Recorrido de ultimo a primero usando las referencias izquierda. */
+    public String mostrarAtras() {
+        if (esVacia()) {
+            return "(lista vacia)";
+        }
+        StringBuilder sb = new StringBuilder();
+        Nodo actual = ultimo;
+        int i = cuenta - 1;
+        while (actual != null) {
+            sb.append(i).append(". ").append(actual.getDato()).append("\n");
+            actual = actual.getIzquierda();
+            i--;
+        }
+        return sb.toString().trim();
+    }
+
     private void validarDato(Object dato) throws Exception {
         if (dato == null) {
             throw new Exception("El dato no puede ser nulo");
