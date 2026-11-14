@@ -1,3 +1,5 @@
+import java.util.Scanner;
+
 /**
  * Sistema de gestion de prestamos de una biblioteca (caso 3).
  *
@@ -160,6 +162,128 @@ public class SistemaBiblioteca {
     private void validarTexto(String valor, String campo) throws Exception {
         if (valor == null || valor.trim().isEmpty()) {
             throw new Exception(campo + " es obligatorio");
+        }
+    }
+
+    // ==================================================================
+    // Menu de consola
+    // ==================================================================
+
+    private static final Scanner entrada = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        SistemaBiblioteca sistema = new SistemaBiblioteca();
+        int opcion;
+        do {
+            mostrarMenu();
+            opcion = leerEntero("Seleccione una opcion: ");
+            System.out.println();
+            try {
+                switch (opcion) {
+                    case 1:
+                        opcionRegistrar(sistema);
+                        break;
+                    case 2:
+                        opcionVerRegistrados(sistema);
+                        break;
+                    case 3:
+                        System.out.println("PRESTAMOS PENDIENTES (orden de entrega):");
+                        System.out.println(sistema.getColaPendientes().mostrar());
+                        break;
+                    case 4:
+                        LibroPrestamo procesado = sistema.procesarSiguiente();
+                        System.out.println("Libro entregado: " + procesado);
+                        break;
+                    case 5:
+                        System.out.println("HISTORIAL DE ENTREGAS (la cima es la mas reciente):");
+                        System.out.println(sistema.getHistorialProcesados().mostrar());
+                        break;
+                    case 6:
+                        LibroPrestamo encontrado = sistema.buscarPorCodigo(leerTexto("Codigo a buscar: "));
+                        System.out.println("Encontrado: " + encontrado);
+                        break;
+                    case 7:
+                        LibroPrestamo cancelado = sistema.cancelarPendiente(leerTexto("Codigo a cancelar: "));
+                        System.out.println("Prestamo cancelado: " + cancelado);
+                        break;
+                    case 8:
+                        LibroPrestamo devuelto = sistema.deshacerUltimoProcesamiento();
+                        System.out.println("Se deshizo la entrega. Vuelve a pendientes: " + devuelto);
+                        break;
+                    case 9:
+                        opcionCantidades(sistema);
+                        break;
+                    case 10:
+                        System.out.println("Fin del programa.");
+                        break;
+                    default:
+                        System.out.println("Opcion no valida. Elija un numero del 1 al 10.");
+                }
+            } catch (Exception e) {
+                System.out.println("ERROR: " + e.getMessage());
+            }
+            System.out.println();
+        } while (opcion != 10);
+    }
+
+    private static void mostrarMenu() {
+        System.out.println("========= BIBLIOTECA - GESTION DE PRESTAMOS =========");
+        System.out.println(" 1. Registrar prestamo");
+        System.out.println(" 2. Ver todos los prestamos registrados");
+        System.out.println(" 3. Ver prestamos pendientes");
+        System.out.println(" 4. Procesar siguiente prestamo (entregar libro)");
+        System.out.println(" 5. Ver historial de prestamos entregados");
+        System.out.println(" 6. Buscar prestamo por codigo");
+        System.out.println(" 7. Cancelar prestamo pendiente");
+        System.out.println(" 8. Deshacer ultima entrega");
+        System.out.println(" 9. Ver cantidad de prestamos");
+        System.out.println("10. Salir");
+    }
+
+    private static void opcionRegistrar(SistemaBiblioteca sistema) throws Exception {
+        String codigo = leerTexto("Codigo del prestamo (ej: PR-001): ");
+        String titulo = leerTexto("Titulo del libro: ");
+        String autor = leerTexto("Autor: ");
+        String usuario = leerTexto("Nombre del usuario: ");
+        int dias = leerEntero("Dias de prestamo (" + DIAS_MINIMOS + "-" + DIAS_MAXIMOS + "): ");
+        LibroPrestamo nuevo = sistema.registrar(codigo, titulo, autor, usuario, dias);
+        System.out.println("Prestamo registrado y enviado a pendientes: " + nuevo);
+    }
+
+    private static void opcionVerRegistrados(SistemaBiblioteca sistema) {
+        int orden = leerEntero("Orden: 1 = del primero al ultimo, 2 = del ultimo al primero: ");
+        System.out.println("TODOS LOS PRESTAMOS REGISTRADOS:");
+        if (orden == 2) {
+            System.out.println(sistema.getListaGeneral().mostrarAtras());
+        } else {
+            System.out.println(sistema.getListaGeneral().mostrarAdelante());
+        }
+    }
+
+    private static void opcionCantidades(SistemaBiblioteca sistema) {
+        int[] c = sistema.cantidades();
+        System.out.println("Registrados (lista general): " + c[0]);
+        System.out.println("Pendientes  (cola)         : " + c[1]);
+        System.out.println("Entregados  (pila)         : " + c[2]);
+        System.out.println("Cancelados                 : " + c[3]);
+    }
+
+    private static String leerTexto(String mensaje) {
+        System.out.print(mensaje);
+        return entrada.hasNextLine() ? entrada.nextLine() : "";
+    }
+
+    private static int leerEntero(String mensaje) {
+        while (true) {
+            String linea = leerTexto(mensaje).trim();
+            try {
+                return Integer.parseInt(linea);
+            } catch (NumberFormatException e) {
+                if (!entrada.hasNextLine() && linea.isEmpty()) {
+                    return 10;   // fin de la entrada: salir
+                }
+                System.out.println("Debe escribir un numero entero.");
+            }
         }
     }
 }
